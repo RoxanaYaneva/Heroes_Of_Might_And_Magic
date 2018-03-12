@@ -58,26 +58,26 @@ public class Engine {
 		return army2.isEmpty() || army2.isEmpty();
 	}
 
-	private static void enterAndProcessCommand(Player player, List<Unit> otherUnits) {
+	private static void enterAndProcessCommand(Player player, List<Unit> enemyArmy) {
 		System.out.println(player.getName() + "should enter his/her command.");
 		String[] command = scanner.nextLine().split("\\s+");
 		if (command[0].equalsIgnoreCase("move")) {
-			executeMove(command, player, otherUnits);
+			executeMove(command, player, enemyArmy);
 		} else if (command[0].equalsIgnoreCase("attack")) {
-			executeAttack(command, player, otherUnits);
+			executeAttack(command, player, enemyArmy);
 		} else if (command[0].equalsIgnoreCase("cast")) {
-			executeCast(command, player, otherUnits);
+			executeCast(command, player, enemyArmy);
 		} else {
 			System.out.println("No such commmand.");
 		}
 	}
 
-	private static void executeMove(String[] command, Player player, List<Unit> otherUnits) {
+	private static void executeMove(String[] command, Player player, List<Unit> enemyArmy) {
 		while (true) {
 			int[] xy = parseCoordinates(command);
 			try {
-				Validator.validatePlayersMove(xy[0], xy[1], xy[2], xy[3], player, otherUnits);
-				player.getUnitFromPos(xy[0], xy[1]).move(xy[2], xy[3]);
+				Validator.validatePlayersMove(xy[0], xy[1], xy[2], xy[3], player, enemyArmy);
+				Unit.getUnitFromPos(xy[0], xy[1], player.getArmy()).move(xy[2], xy[3]);
 				break;
 			} catch (InvalidActionException e) {
 				System.out.println(e.getLocalizedMessage());
@@ -87,13 +87,13 @@ public class Engine {
 		}
 	}
 
-	private static void executeAttack(String[] command, Player player, List<Unit> otherUnits) {
+	private static void executeAttack(String[] command, Player player, List<Unit> enemyArmy) {
 		while (true) {
 			int[] xy = parseCoordinates(command);
 			try {
-				Validator.validatePlayersAttack(xy[0], xy[1], xy[2], xy[3], player, otherUnits);
-				player.getUnitFromPos(xy[0], xy[1]).attack(xy[2], xy[3], otherUnits);
-				Unit.checkForDeadUnits(otherUnits);
+				Validator.validatePlayersAttack(xy[0], xy[1], xy[2], xy[3], player, enemyArmy);
+				Unit.getUnitFromPos(xy[0], xy[1], player.getArmy()).attack(xy[2], xy[3], enemyArmy);
+				Unit.checkForDeadUnits(enemyArmy);
 				break;
 			} catch (InvalidActionException e) {
 				System.out.println(e.getLocalizedMessage());
@@ -103,29 +103,29 @@ public class Engine {
 		}
 	}
 
-	private static void executeCast(String[] command, Player player, List<Unit> otherUnits) {
+	private static void executeCast(String[] command, Player player, List<Unit> enemyArmy) {
 		while (true) {
 			int toX = Integer.parseInt(command[3]);
 			int toY = Integer.parseInt(command[4]);
 			try {
-				Validator.validatePlayersCast(toX, toY, command[2], player.getHero(), otherUnits);
+				Validator.validatePlayersCast(toX, toY, command[2], player.getHero(), enemyArmy);
 				switch (command[1]) {
 				case "Fireball":
-					((Mage) player.getHero()).fireball(toX, toY, otherUnits);
+					((Mage) player.getHero()).fireball(toX, toY, enemyArmy);
 					break;
 				case "Iceball":
-					((Mage) player.getHero()).iceball(toX, toY, otherUnits);
+					((Mage) player.getHero()).iceball(toX, toY, enemyArmy);
 					break;
 				case "Stun":
-					((Warrior) player.getHero()).stun(toX, toY, otherUnits);
+					((Warrior) player.getHero()).stun(toX, toY, enemyArmy);
 					break;
 				case "Shield":
-					((Warrior) player.getHero()).stun(toX, toY, otherUnits);
+					((Warrior) player.getHero()).stun(toX, toY, player.getArmy());
 					break;
 				default:
 					System.out.println("No such spell.");
 				}
-				Unit.checkForDeadUnits(otherUnits);
+				Unit.checkForDeadUnits(enemyArmy);
 				break;
 			} catch (InvalidActionException e) {
 				System.out.println(e.getMessage());
@@ -166,7 +166,7 @@ public class Engine {
 		player.setRace(race);
 	}
 
-	private static void buyUnits(Player player, List<Unit> otherUnits) {
+	private static void buyUnits(Player player, List<Unit> enemyArmy) {
 		System.out.println(player.getName() + " should buy units. Enter quit when you are ready.");
 		String command;
 		while (!(command = scanner.nextLine()).equals("quit")) {
@@ -177,7 +177,7 @@ public class Engine {
 				try {
 					player.buyMonster(number, unit);
 					Unit monster = getMonster(number, unit);
-					positionUnitOnField(monster, player.getArmy(), otherUnits);
+					positionUnitOnField(monster, player.getArmy(), enemyArmy);
 					player.addUnitToArmy(monster);
 				} catch (NumberFormatException | InsufficientAmountOfMoneyException e) {
 					System.out.println(e.getMessage());
@@ -253,7 +253,7 @@ public class Engine {
 		return race.equals(monsterRace);
 	}
 
-	private static void chooseTypeOfHero(Player player, List<Unit> otherUnits) {
+	private static void chooseTypeOfHero(Player player, List<Unit> enemyArmy) {
 		System.out.print(player.getName() + " should choose what type of hero he/she wants (Mage or Warrior): ");
 		String typeOfHero = scanner.nextLine();
 		while (!typeOfHero.equals("Mage") || !typeOfHero.equals("Warrior")) {
@@ -261,7 +261,7 @@ public class Engine {
 			typeOfHero = scanner.nextLine();
 		}
 		player.createHero(typeOfHero);
-		positionUnitOnField(player.getHero(), player.getArmy(), otherUnits);
+		positionUnitOnField(player.getHero(), player.getArmy(), enemyArmy);
 		player.addUnitToArmy(player.getHero());
 	}
 

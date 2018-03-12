@@ -19,7 +19,7 @@ public class Validator {
 			throw new InvalidActionException("There are no such fields.");
 		}
 
-		Unit unitFrom = player.getUnitFromPos(fromX, fromY);
+		Unit unitFrom = Unit.getUnitFromPos(fromX, fromY, player.getArmy());
 		if (unitFrom == null) {
 			throw new InvalidActionException(
 					"There is no unit from " + player.getName() + "'s army at " + fromX + ", " + fromY);
@@ -40,39 +40,41 @@ public class Validator {
 			throw new InvalidActionException("There is already unit on this field");
 		}
 
-		if ((Math.abs(fromX - toX) < unitFrom.getStamina()) || (Math.abs(fromY - toY) < unitFrom.getStamina())) {
+		if ((Math.abs(fromX - toX) > unitFrom.getStamina()) || (Math.abs(fromY - toY) > unitFrom.getStamina())) {
 			throw new InvalidActionException("There is not enough stamina for this move.");
 		}
 	}
 
 	public static void validatePlayersAttack(int fromX, int fromY, int toX, int toY, Player player,
 			List<Unit> enemyArmy) throws InvalidActionException {
-		// int fromX = this.position.getX();
-		// int fromY = this.position.getY();
-		//
-		// if ((atX < 1 || atX > Field.WIDTH) || (atY < 1 || atY >
-		// Field.LENGTH)) {
-		// throw new InvalidActionException("There is no such field");
-		// }
-		//
-		// if ((Math.abs(fromX - atX) < this.range) || (Math.abs(fromY - atY) <
-		// this.range)) {
-		// throw new InvalidActionException("There is not enough stamina.");
-		// }
-		//
-		// if (this.isShielded) {
-		// System.out.println("This unit is shielded.");
-		// return;
-		// }
-		//
-		// Unit enemyUnit = getUnitFromPos(atX, atY, enemyArmy);
-		// if (enemyUnit == null) {
-		// throw new InvalidActionException("There is no unit at this
-		// position.");
-		// } else {
-		//
-		// }
 
+		if (!Field.isFieldValid(fromX, fromY) || !Field.isFieldValid(toX, toY)) {
+			throw new InvalidActionException("There are no such fields.");
+		}
+
+		Unit unitFrom = Unit.getUnitFromPos(fromX, fromY, player.getArmy());
+		if (unitFrom == null) {
+			throw new InvalidActionException(
+					"There is no unit from " + player.getName() + "'s army at " + fromX + ", " + fromY);
+		}
+
+		if (unitFrom.isStunned()) {
+			unitFrom.yield();
+			throw new InvalidActionException("Unit is stunned and cannot attack.");
+		}
+
+		Unit unitTo = Unit.getUnitFromPos(toX, toY, enemyArmy);
+		if (unitTo == null) {
+			throw new InvalidActionException("There is no unit from the enemy's army at " + toX + ", " + toY);
+		}
+
+		if (unitTo.isShielded()) {
+			throw new InvalidActionException("The enemy unit is shielded and cannot be attacked.");
+		}
+
+		if ((Math.abs(fromX - toX) > unitFrom.getRange()) || (Math.abs(fromY - toY) > unitFrom.getRange())) {
+			throw new InvalidActionException("There is not enough stamina for this move.");
+		}
 	}
 
 	public static void validatePlayersCast(int atX, int atY, String spell, Hero hero, List<Unit> units)
@@ -80,6 +82,18 @@ public class Validator {
 
 		if (!Field.isFieldValid(atX, atY)) {
 			throw new InvalidActionException("There is no such field.");
+		}
+
+		int fromX = hero.getPosition().getX();
+		int fromY = hero.getPosition().getY();
+		if (hero instanceof Mage
+				&& (Math.abs(fromX - atX) > hero.getRange() || (Math.abs(fromY - atY) > hero.getRange()))) {
+			throw new InvalidActionException("Mage cannot make this magic.");
+		}
+
+		if (hero instanceof Warrior
+				&& (Math.abs(fromX - atX) > hero.getRange() || (Math.abs(fromY - atY) > hero.getRange()))) {
+			throw new InvalidActionException("Warrior cannot make this magic.");
 		}
 
 		if (hero instanceof Mage && (!spell.equals("Fireball") || !spell.equals("Iceball"))) {

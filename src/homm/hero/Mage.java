@@ -19,11 +19,6 @@ public class Mage extends Hero {
 		super(health, armor, range, damage, stamina);
 	}
 
-	@Override
-	public void attack(int atX, int atY, List<Unit> enemyArmy) {
-
-	}
-
 	public void fireball(int atX, int atY, List<Unit> enemyArmy) {
 		// super.attack(atX, atY, units);
 		this.mana -= MANA_FIREBALL;

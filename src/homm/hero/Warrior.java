@@ -11,17 +11,12 @@ public class Warrior extends Hero {
 
 	public static final int HP_WARRIOR = 13;
 	public static final int ARMOR_WARRIOR = 4;
-	public static final int RANGE_WARRIOR = 3;
+	public static final int RANGE_WARRIOR = 1;
 	public static final int DAMAGE_WARRIOR = 10;
 	public static final int STAMINA_WARRIOR = 4;
 
 	public Warrior(int health, int armor, int range, int damage, int stamina) {
 		super(health, armor, range, damage, stamina);
-	}
-	
-	@Override
-	public void attack(int atX, int atY, List<Unit> enemyArmy) {
-		
 	}
 
 	public void stun(int atX, int atY, List<Unit> units) {

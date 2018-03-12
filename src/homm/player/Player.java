@@ -37,12 +37,6 @@ public class Player {
 		this.army = new ArrayList<>();
 	}
 
-	public Unit getUnitFromPos(int x, int y) {
-		Unit unit = this.army.stream().filter(u -> u.getPosition().getX() == x).filter(u -> u.getPosition().getY() == y)
-				.findAny().orElse(null);
-		return unit;
-	}
-
 	public void addUnitToArmy(Unit unit) {
 		this.army.add(unit);
 		if (unit instanceof Monster) { // added a monster

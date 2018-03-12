@@ -1,5 +1,7 @@
 package homm.hero;
 
+import java.util.List;
+
 import homm.unit.Unit;
 
 public abstract class Hero extends Unit {
@@ -17,6 +19,11 @@ public abstract class Hero extends Unit {
 	}
 	
 	public abstract boolean hasEnoughMana(String spell);
+	
+	@Override
+	public void attack(int atX, int atY, List<Unit> enemyArmy) {
+
+	}
 
 	public double getMana() {
 		return mana;
