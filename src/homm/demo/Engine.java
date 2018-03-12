@@ -45,6 +45,10 @@ public class Engine {
 
 		startBattle(playerOne, playerTwo);
 	}
+	
+	public void announceWinner() {
+		
+	}
 
 	public static void startBattle(Player playerOne, Player playerTwo) {
 		System.out.println("Let the battle start...");
