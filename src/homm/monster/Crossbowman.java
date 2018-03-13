@@ -18,6 +18,16 @@ public class Crossbowman extends Archer {
 	}
 
 	@Override
-	public void attack(int atX, int atY, List<Unit> units) {
+	public void attack(int atX, int atY, List<Unit> enemyArmy) {
+		Unit unit = null;
+		for (int i = atX - 1; i <= atX + 1; ++i) {
+			for (int j = atY - 1; j <= atY + 1; ++j) {
+				unit = Unit.getUnitFromPos(i, j, enemyArmy);
+				if (unit != null) {
+					super.attack(i, j, enemyArmy);
+				}
+			}
+		}
 	}
+	
 }

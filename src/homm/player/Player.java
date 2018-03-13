@@ -17,7 +17,6 @@ import homm.monster.Crossbowman;
 import homm.monster.HornedDemon;
 import homm.monster.HornedGrunt;
 import homm.monster.Imp;
-import homm.monster.Monster;
 import homm.monster.Peasant;
 import homm.monster.Vermin;
 import homm.unit.Unit;
@@ -29,30 +28,24 @@ public class Player {
 	private double gold;
 	private Hero hero;
 	private List<Unit> army;
-	private String[] info;
+	private List<String> info;
 	private String race;
 
 	public Player(int id) {
 		this.id = id;
+		this.info = new ArrayList<>();
 		this.army = new ArrayList<>();
 	}
 
 	public void addUnitToArmy(Unit unit) {
 		this.army.add(unit);
-		if (unit instanceof Monster) { // added a monster
-			System.out.println("You've successfully added " + ((Monster) unit).getNumberOfMonsters()
-					+ unit.getClass().getSimpleName());
-		} else { // added a hero
-			System.out.println("You've successfully added a " + unit.getClass().getSimpleName());
-		}
 	}
 
 	public void loadInformation() throws FileNotFoundException, IOException {
-		try (BufferedReader br = new BufferedReader(new FileReader(name))) {
-			int i = 0;
+		try (BufferedReader br = new BufferedReader(new FileReader(name + ".txt"))) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				this.info[i++] = line;
+				this.info.add(line);
 			}
 		}
 	}
@@ -60,19 +53,21 @@ public class Player {
 	public void createHero(String type) {
 		if (type.equals("Mage")) {
 			this.hero = new Mage(Mage.HP_MAGE, Mage.ARMOR_MAGE, Mage.RANGE_MAGE, Mage.DAMAGE_MAGE, Mage.STAMINA_MAGE);
-			this.hero.setLevel(Integer.parseInt(info[1]));
-			this.hero.setExperience(Integer.parseInt(info[2]));
-			this.hero.setNextLvlExperience(Integer.parseInt(info[3]));
-			this.hero.setMana(Double.parseDouble(info[4]));
-			this.hero.setCrit(Double.parseDouble(info[5]));
+			this.hero.setNumberOfUnits(1);
+			this.hero.setLevel(Integer.parseInt(info.get(1)));
+			this.hero.setExperience(Integer.parseInt(info.get(2)));
+			this.hero.setNextLvlExperience(Integer.parseInt(info.get(3)));
+			this.hero.setMana(Double.parseDouble(info.get(4)));
+			this.hero.setCrit(Double.parseDouble(info.get(5)));
 		} else {
 			this.hero = new Warrior(Warrior.HP_WARRIOR, Warrior.ARMOR_WARRIOR, Warrior.RANGE_WARRIOR,
 					Warrior.DAMAGE_WARRIOR, Warrior.STAMINA_WARRIOR);
-			this.hero.setLevel(Integer.parseInt(info[1]));
-			this.hero.setExperience(Integer.parseInt(info[2]));
-			this.hero.setNextLvlExperience(Integer.parseInt(info[3]));
-			this.hero.setMana(Double.parseDouble(info[4]));
-			this.hero.setCrit(Double.parseDouble(info[5]));
+			this.hero.setNumberOfUnits(1);
+			this.hero.setLevel(Integer.parseInt(info.get(1)));
+			this.hero.setExperience(Integer.parseInt(info.get(2)));
+			this.hero.setNextLvlExperience(Integer.parseInt(info.get(3)));
+			this.hero.setMana(Double.parseDouble(info.get(4)));
+			this.hero.setCrit(Double.parseDouble(info.get(5)));
 		}
 	}
 
@@ -123,7 +118,7 @@ public class Player {
 		return id;
 	}
 
-	public String[] getInfo() {
+	public List<String> getInfo() {
 		return info;
 	}
 

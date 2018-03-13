@@ -13,7 +13,8 @@ public abstract class Unit {
 	protected int range;
 	protected int stamina;
 	protected Position position;
-
+	protected int numberOfUnits;
+	
 	protected boolean isFrozen = false;
 	protected boolean isStunned = false;
 	protected boolean isShielded = false;
@@ -151,5 +152,21 @@ public abstract class Unit {
 
 	public boolean isShielded() {
 		return isShielded;
+	}
+	
+	public int getNumberOfUnits() {
+		return numberOfUnits;
+	}
+
+	public void setNumberOfUnits(int number) {
+		this.numberOfUnits = number;
+	}
+
+	public void updateGroup(int points) {
+		int newHP = health * numberOfUnits - points;
+		numberOfUnits = newHP / health;
+		if (numberOfUnits <= 0) {
+			this.die();
+		}
 	}
 }

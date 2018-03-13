@@ -22,7 +22,15 @@ public abstract class Hero extends Unit {
 	
 	@Override
 	public void attack(int atX, int atY, List<Unit> enemyArmy) {
-
+		int totalDamage =  (int) (this.damage + this.damage * this.crit);
+		Unit unit = Unit.getUnitFromPos(atX, atY, enemyArmy);
+		int totalArmor = unit.getNumberOfUnits() * unit.getArmor();
+		int points = totalDamage - totalArmor;
+		if (points < 0) {
+			this.updateGroup(points);
+		} else if (points > 0) {
+			unit.updateGroup(points);
+		}
 	}
 
 	public double getMana() {

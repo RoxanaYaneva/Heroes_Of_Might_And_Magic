@@ -1,24 +1,30 @@
 package homm.monster;
 
+import java.util.List;
+
 import homm.unit.Unit;
 
 public abstract class Monster extends Unit {
 
-	protected int numberOfMonsters;
 	protected double price;
 
 	public Monster(int health, int armor, int range, int damage, int stamina, int numberOfMonsters, double price) {
 		super(health, armor, range, damage, stamina);
-		this.numberOfMonsters = numberOfMonsters;
+		this.numberOfUnits = numberOfMonsters;
 		this.price = price;
 	}
 
-	public int getNumberOfMonsters() {
-		return numberOfMonsters;
-	}
-
-	public void setNumberOfMonsters(int numberOfMonsters) {
-		this.numberOfMonsters = numberOfMonsters;
+	@Override
+	public void attack(int atX, int atY, List<Unit> enemyArmy) {
+		int totalDamage = this.numberOfUnits * this.damage;
+		Unit unit = Unit.getUnitFromPos(atX, atY, enemyArmy);
+		int totalArmor = unit.getNumberOfUnits() * unit.getArmor();
+		int points = totalDamage - totalArmor;
+		if (points < 0) {
+			this.updateGroup(points);
+		} else if (points > 0) {
+			unit.updateGroup(points);
+		}
 	}
 
 	public double getPrice() {

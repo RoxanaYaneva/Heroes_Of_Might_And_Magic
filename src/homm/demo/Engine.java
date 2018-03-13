@@ -45,9 +45,84 @@ public class Engine {
 
 		startBattle(playerOne, playerTwo);
 	}
+
+	private static void readPlayersName(Player player) {
+		System.out.print("Player should enter his/her name: ");
+		String name = scanner.nextLine();
+		player.setName(name);
+		try {
+			player.loadInformation();
+			player.setGold(Double.parseDouble(player.getInfo().get(0)));
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	private static void chooseRace(Player player) {
+		System.out.print(player.getName() + " should enter the race he/she wants to play with: ");
+		String race = scanner.nextLine();
+		while (!race.equals("Inferno") && !race.equals("Heaven")) {
+			System.out.println("Invalid race. Please enter Heaven or Inferno.");
+			race = scanner.nextLine();
+		}
+		player.setRace(race);
+	}
+
+	private static void buyUnits(Player player, List<Unit> enemyArmy) {
+		System.out.println(player.getName() + " should buy units. Enter quit when you are ready.");
+		String command = scanner.nextLine();
+		while (!command.equals("quit")) {
+			String[] attributes = command.split("\\s+");
+			int number = Integer.parseInt(attributes[1]);
+			String unit = attributes[2];
+			if(unit.equals("Horned")) {
+				unit += " " + attributes[3];
+			}
+			if (isOfRace(player.getRace(), unit)) {
+				try {
+					player.buyMonster(number, unit);
+					Unit monster = getMonster(number, unit);
+					positionUnitOnField(monster, player.getArmy(), enemyArmy);
+					player.addUnitToArmy(monster);
+					scanner.nextLine();
+				} catch (NumberFormatException | InsufficientAmountOfMoneyException e) {
+					System.out.println(e.getMessage());
+				}
+			} else {
+				System.out.println("No such unit of race " + player.getRace());
+			}
+			command = scanner.nextLine();
+		}
+	}
+
+	private static void chooseTypeOfHero(Player player, List<Unit> enemyArmy) {
+		System.out.print(player.getName() + " should choose what type of hero he/she wants (Mage or Warrior): ");
+		String typeOfHero = scanner.nextLine();
+		while (!typeOfHero.equals("Mage") && !typeOfHero.equals("Warrior")) {
+			System.out.print("Invalid type. Please enter Mage or Warrior.");
+			typeOfHero = scanner.nextLine();
+		}
+		player.createHero(typeOfHero);
+		positionUnitOnField(player.getHero(), player.getArmy(), enemyArmy);
+		player.addUnitToArmy(player.getHero());
+	}
+
+	private static void positionUnitOnField(Unit unit, List<Unit> armyOne, List<Unit> armyTwo) {
+		System.out.println("Set the position x and y of the unit: ");
+		int x, y;
+		x = scanner.nextInt();
+		y = scanner.nextInt();
+		while (isThereUnitAtPos(x, y, armyOne, armyTwo)) {
+			System.out.println("There is a unit at this position already. Please set new x and y: ");
+			x = scanner.nextInt();
+			y = scanner.nextInt();
+		}
+		unit.setPosition(x, y);
+	}
 	
-	public void announceWinner() {
-		
+	private static boolean isThereUnitAtPos(int x, int y, List<Unit> armyOne, List<Unit> armyTwo) {
+		Unit unit = Unit.getUnitFromPos(x, y, armyOne, armyTwo);
+		return unit == null ? false : true;
 	}
 
 	public static void startBattle(Player playerOne, Player playerTwo) {
@@ -56,10 +131,15 @@ public class Engine {
 			enterAndProcessCommand(playerOne, playerTwo.getArmy());
 			enterAndProcessCommand(playerTwo, playerOne.getArmy());
 		}
+		if (playerOne.getArmy().isEmpty()) {
+			System.out.println("The winner is " + playerTwo.getName());
+		} else {
+			System.out.println("The winner is " + playerOne.getName());
+		}
 	}
 
-	private static boolean isEndOfGame(List<Unit> army, List<Unit> army2) {
-		return army2.isEmpty() || army2.isEmpty();
+	private static boolean isEndOfGame(List<Unit> army, List<Unit> armyTwo) {
+		return army.isEmpty() || armyTwo.isEmpty();
 	}
 
 	private static void enterAndProcessCommand(Player player, List<Unit> enemyArmy) {
@@ -148,50 +228,6 @@ public class Engine {
 		return coord;
 	}
 
-	private static void readPlayersName(Player player) {
-		System.out.print("Player should enter his/her name: ");
-		String name = scanner.nextLine();
-		player.setName(name);
-		try {
-			player.loadInformation();
-			player.setGold(Double.parseDouble(player.getInfo()[0]));
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private static void chooseRace(Player player) {
-		System.out.print(player.getName() + " should enter the race he/she wants to play with: ");
-		String race = scanner.nextLine();
-		while (!race.equals("Inferno") || !race.equals("Heaven")) {
-			System.out.println("Invalid race. Please enter Heaven or Inferno.");
-			race = scanner.nextLine();
-		}
-		player.setRace(race);
-	}
-
-	private static void buyUnits(Player player, List<Unit> enemyArmy) {
-		System.out.println(player.getName() + " should buy units. Enter quit when you are ready.");
-		String command;
-		while (!(command = scanner.nextLine()).equals("quit")) {
-			String[] attributes = command.split("\\s+");
-			int number = Integer.parseInt(attributes[1]);
-			String unit = attributes[2];
-			if (isOfRace(player.getRace(), unit)) {
-				try {
-					player.buyMonster(number, unit);
-					Unit monster = getMonster(number, unit);
-					positionUnitOnField(monster, player.getArmy(), enemyArmy);
-					player.addUnitToArmy(monster);
-				} catch (NumberFormatException | InsufficientAmountOfMoneyException e) {
-					System.out.println(e.getMessage());
-				}
-			} else {
-				System.out.println("No such unit.");
-			}
-		}
-	}
-
 	public static Unit getMonster(int numberOfUnits, String unit) {
 		Unit monster = null;
 		switch (unit) {
@@ -255,35 +291,5 @@ public class Engine {
 			break;
 		}
 		return race.equals(monsterRace);
-	}
-
-	private static void chooseTypeOfHero(Player player, List<Unit> enemyArmy) {
-		System.out.print(player.getName() + " should choose what type of hero he/she wants (Mage or Warrior): ");
-		String typeOfHero = scanner.nextLine();
-		while (!typeOfHero.equals("Mage") || !typeOfHero.equals("Warrior")) {
-			System.out.print("Invalid type. Please enter Mage or Warrior.");
-			typeOfHero = scanner.nextLine();
-		}
-		player.createHero(typeOfHero);
-		positionUnitOnField(player.getHero(), player.getArmy(), enemyArmy);
-		player.addUnitToArmy(player.getHero());
-	}
-
-	private static boolean isThereUnitAtPos(int x, int y, List<Unit> armyOne, List<Unit> armyTwo) {
-		Unit unit = Unit.getUnitFromPos(x, y, armyOne, armyTwo);
-		return unit == null ? false : true;
-	}
-
-	private static void positionUnitOnField(Unit unit, List<Unit> armyOne, List<Unit> armyTwo) {
-		System.out.println("Set the position x and y of the hero: ");
-		int x, y;
-		x = scanner.nextInt();
-		y = scanner.nextInt();
-		while (isThereUnitAtPos(x, y, armyOne, armyTwo)) {
-			System.out.println("There is a unit at this position already. Please set new x and y: ");
-			x = scanner.nextInt();
-			y = scanner.nextInt();
-		}
-		unit.setPosition(x, y);
 	}
 }

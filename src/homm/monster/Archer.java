@@ -1,9 +1,5 @@
 package homm.monster;
 
-import java.util.List;
-
-import homm.unit.Unit;
-
 public class Archer extends Monster {
 
 	public static final int HP_ARCHER = 23;
@@ -15,9 +11,5 @@ public class Archer extends Monster {
 
 	public Archer(int health, int armor, int range, int damage, int stamina, int numberOfMonsters, double price) {
 		super(health, armor, range, damage, stamina, numberOfMonsters, price);
-	}
-
-	@Override
-	public void attack(int x, int y, List<Unit> units) {
 	}
 }

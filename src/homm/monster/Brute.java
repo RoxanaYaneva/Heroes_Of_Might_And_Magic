@@ -9,7 +9,7 @@ public class Brute extends Peasant {
 	public static final int HP_BRUTE = 15;
 	public static final int ARMOR_BRUTE = 6;
 	public static final double PRICE_BRUTE = 120;
-	public static final int RANGE_BRUTE = 3;
+	public static final int RANGE_BRUTE = 1;
 	public static final int DAMAGE_BRUTE = 10;
 	public static final int STAMINA_BRUTE = 4;
 
@@ -18,7 +18,25 @@ public class Brute extends Peasant {
 	}
 
 	@Override
-	public void attack(int x, int y, List<Unit> units) {
-
+	public void attack(int atX, int atY, List<Unit> enemyArmy) {
+		super.attack(atX, atY, enemyArmy);
+		Unit unit = null;
+		int totalArmor = 0, points = 0;
+		double totalDamage = this.numberOfUnits * this.damage * 0.25;
+		for (int i = atX - 1; i <= atX + 1; ++i) {
+			for (int j = atY - 1; j <= atY + 1; ++j) {
+				if (i != atX && j != atY) {
+					unit = Unit.getUnitFromPos(i, j, enemyArmy);
+					if (unit != null) {
+						totalArmor = unit.getNumberOfUnits() * unit.getArmor();
+						points = (int) (totalDamage - totalArmor);
+						if (points > 0) {
+							unit.updateGroup(points);
+						}
+					}
+				}
+			}
+		}
 	}
+	
 }
