@@ -6,6 +6,8 @@ import homm.unit.Unit;
 
 public class Vermin extends Imp {
 
+	private static final double DEMAGE_PERCENTAGE = 0.25;
+	
 	public static final int HP_VERMIN = 23;
 	public static final int ARMOR_VERMIN = 7;
 	public static final double PRICE_VERMIN = 140;
@@ -20,7 +22,7 @@ public class Vermin extends Imp {
 	@Override
 	public void attack(int atX, int atY, List<Unit> enemyArmy) {
 		super.attack(atX, atY, enemyArmy);
-		double totalDamage = this.numberOfUnits * this.damage * 0.25;
+		double totalDamage = this.numberOfUnits * this.damage * DEMAGE_PERCENTAGE;
 		Unit unit = Unit.getUnitFromPos(atX, atY, enemyArmy);
 		int totalArmor = unit.getNumberOfUnits() * unit.getArmor();
 		int points = (int) (totalDamage - totalArmor);

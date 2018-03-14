@@ -20,9 +20,9 @@ public class Mage extends Hero {
 	}
 
 	public void fireball(int atX, int atY, List<Unit> enemyArmy) {
-		// super.attack(atX, atY, units);
+		super.attack(atX, atY, enemyArmy);
 		this.mana -= MANA_FIREBALL;
-		this.mana += mana * MANA_RETURN_PERCANTAGE;
+		returnMana();
 	}
 
 	public void iceball(int atX, int atY, List<Unit> enemyArmy) {

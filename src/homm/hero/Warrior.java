@@ -22,7 +22,7 @@ public class Warrior extends Hero {
 	public void stun(int atX, int atY, List<Unit> units) {
 		Unit.getUnitFromPos(atX, atY, units).stun();
 		mana -= MANA_STUN;
-		mana += mana * MANA_RETURN_PERCANTAGE;
+		returnMana();
 	}
 
 	public void shield(int atX, int atY, List<Unit> units) {
@@ -36,7 +36,7 @@ public class Warrior extends Hero {
 		boolean has = false;
 		if (spell.equals("Stun")) {
 			has = mana >= MANA_STUN ? true : false;
-		} else { // Ice ball
+		} else { // Shield
 			has = mana >= MANA_SHIELD ? true : false;
 		}
 		return has;
