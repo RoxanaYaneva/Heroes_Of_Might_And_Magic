@@ -50,7 +50,7 @@ public class Player {
 		}
 	}
 
-	public void createHero(String type) {
+	public Hero createHero(String type) {
 		if (type.equals("Mage")) {
 			this.hero = new Mage(Mage.HP_MAGE, Mage.ARMOR_MAGE, Mage.RANGE_MAGE, Mage.DAMAGE_MAGE, Mage.STAMINA_MAGE);
 			this.hero.setNumberOfUnits(1);
@@ -69,42 +69,33 @@ public class Player {
 			this.hero.setMana(Double.parseDouble(info.get(4)));
 			this.hero.setCrit(Double.parseDouble(info.get(5)));
 		}
+		return this.hero;
 	}
 
 	public void buyMonster(int numberOfUnits, String unit) throws InsufficientAmountOfMoneyException {
 		double totalSum = 0;
 		switch (unit) {
 		case "Peasant":
-			totalSum += numberOfUnits * Peasant.PRICE_PEASANT;
-			break;
+			totalSum += numberOfUnits * Peasant.PRICE_PEASANT; break;
 		case "Brute":
-			totalSum += numberOfUnits * Brute.PRICE_BRUTE;
-			break;
+			totalSum += numberOfUnits * Brute.PRICE_BRUTE; break;
 		case "Archer":
-			totalSum += numberOfUnits * Archer.PRICE_ARCHER;
-			break;
+			totalSum += numberOfUnits * Archer.PRICE_ARCHER; break;
 		case "Crossbowman":
-			totalSum += numberOfUnits * Crossbowman.PRICE_CROSSBOWMAN;
-			break;
+			totalSum += numberOfUnits * Crossbowman.PRICE_CROSSBOWMAN; break;
 		case "Imp":
-			totalSum += numberOfUnits * Imp.PRICE_IMP;
-			break;
+			totalSum += numberOfUnits * Imp.PRICE_IMP; break;
 		case "Vermin":
-			totalSum += numberOfUnits * Vermin.PRICE_VERMIN;
-			break;
+			totalSum += numberOfUnits * Vermin.PRICE_VERMIN; break;
 		case "Horned demon":
-			totalSum += numberOfUnits * HornedDemon.PRICE_HORNEDDEMON;
-			break;
+			totalSum += numberOfUnits * HornedDemon.PRICE_HORNEDDEMON; break;
 		case "Horned grunt":
-			totalSum += numberOfUnits * HornedGrunt.PRICE_HORNEDGRUNT;
-			break;
-		default:
-			break;
+			totalSum += numberOfUnits * HornedGrunt.PRICE_HORNEDGRUNT; break;
+		default: break;
 		}
 
 		if (totalSum <= this.gold) {
 			this.gold -= totalSum;
-			System.out.println("You've succesfully bought " + numberOfUnits + " " + unit + "(s).");
 		} else {
 			throw new InsufficientAmountOfMoneyException("You don't have enough money.");
 		}

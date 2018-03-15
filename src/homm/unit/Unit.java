@@ -1,9 +1,8 @@
 package homm.unit;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
-
-import homm.exceptions.InvalidActionException;
 
 public abstract class Unit {
 
@@ -28,12 +27,11 @@ public abstract class Unit {
 		this.range = range;
 		this.stamina = stamina;
 	}
-	
+
 	public abstract void attack(int x, int y, List<Unit> units);
 
-	public void move(int toX, int toY) throws InvalidActionException {
+	public void move(int toX, int toY) {
 		this.setPosition(toX, toY);
-		System.out.println("You've succesffully moved " + " to " + toX + ", " + toY);
 	}
 
 	public static Unit getUnitFromPos(int x, int y, List<Unit> units) {
@@ -57,9 +55,20 @@ public abstract class Unit {
 	}
 	
 	public static void checkForDeadUnits(List<Unit> units) {
-		units.stream()
-		.filter(u -> u.isDead())
-		.forEach(units::remove);
+		Iterator<Unit> iter = units.iterator();
+		while (iter.hasNext()) {
+			if (iter.next().isDead()) {
+				iter.remove();
+			}
+		}
+	}
+	
+	public void updateGroup(int points) {
+		int newHP = this.health * this.numberOfUnits - points;
+		this.numberOfUnits = newHP / this.health;
+		if (numberOfUnits <= 0) {
+			this.die();
+		}
 	}
 
 	public void die() {
@@ -80,10 +89,6 @@ public abstract class Unit {
 
 	public void setArmor(int armor) {
 		this.armor = armor;
-	}
-
-	public void setPosition(Position position) {
-		this.position = position;
 	}
 
 	public void setPosition(int x, int y) {
@@ -160,13 +165,5 @@ public abstract class Unit {
 
 	public void setNumberOfUnits(int number) {
 		this.numberOfUnits = number;
-	}
-
-	public void updateGroup(int points) {
-		int newHP = health * numberOfUnits - points;
-		numberOfUnits = newHP / health;
-		if (numberOfUnits <= 0) {
-			this.die();
-		}
 	}
 }

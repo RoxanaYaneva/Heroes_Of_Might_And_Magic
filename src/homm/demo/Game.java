@@ -6,6 +6,5 @@ public class Game {
 
 		Engine game = new Engine();
 		game.start();
-		
 	}
 }

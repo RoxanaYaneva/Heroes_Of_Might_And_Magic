@@ -22,23 +22,23 @@ public class Mage extends Hero {
 	public void fireball(int atX, int atY, List<Unit> enemyArmy) {
 		super.attack(atX, atY, enemyArmy);
 		this.mana -= MANA_FIREBALL;
-		returnMana();
+		this.returnMana();
 	}
 
 	public void iceball(int atX, int atY, List<Unit> enemyArmy) {
 		Unit.getUnitFromPos(atX, atY, enemyArmy).freeze();
 		this.mana -= MANA_ICEBALL;
-		this.mana += mana * MANA_RETURN_PERCANTAGE;
+		this.returnMana();
 	}
 
 	@Override
 	public boolean hasEnoughMana(String spell) {
-		boolean has = false;
+		boolean hasMagic;
 		if (spell.equals("Fireball")) {
-			has = mana >= MANA_FIREBALL ? true : false;
+			hasMagic = this.mana >= MANA_FIREBALL ? true : false;
 		} else { // Ice ball
-			has = mana >= MANA_ICEBALL ? true : false;
+			hasMagic = this.mana >= MANA_ICEBALL ? true : false;
 		}
-		return has;
+		return hasMagic;
 	}
 }

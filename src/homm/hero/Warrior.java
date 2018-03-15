@@ -21,24 +21,24 @@ public class Warrior extends Hero {
 
 	public void stun(int atX, int atY, List<Unit> units) {
 		Unit.getUnitFromPos(atX, atY, units).stun();
-		mana -= MANA_STUN;
-		returnMana();
+		this.mana -= MANA_STUN;
+		this.returnMana();
 	}
 
 	public void shield(int atX, int atY, List<Unit> units) {
 		Unit.getUnitFromPos(atX, atY, units).shield();
-		mana -= MANA_SHIELD;
-		mana += mana * MANA_RETURN_PERCANTAGE;
+		this.mana -= MANA_SHIELD;
+		this.returnMana();
 	}
 	
 	@Override
 	public boolean hasEnoughMana(String spell) {
-		boolean has = false;
+		boolean hasMagic;
 		if (spell.equals("Stun")) {
-			has = mana >= MANA_STUN ? true : false;
+			hasMagic = mana >= MANA_STUN ? true : false;
 		} else { // Shield
-			has = mana >= MANA_SHIELD ? true : false;
+			hasMagic = mana >= MANA_SHIELD ? true : false;
 		}
-		return has;
+		return hasMagic;
 	}
 }

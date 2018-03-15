@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import homm.exceptions.InsufficientAmountOfMoneyException;
 import homm.exceptions.InvalidActionException;
+import homm.hero.Hero;
 import homm.hero.Mage;
 import homm.hero.Warrior;
 import homm.monster.Archer;
@@ -49,17 +50,22 @@ public class Engine {
 	private static void readPlayersName(Player player) {
 		System.out.print("Player should enter his/her name: ");
 		String name = scanner.nextLine();
-		player.setName(name);
-		try {
-			player.loadInformation();
-			player.setGold(Double.parseDouble(player.getInfo().get(0)));
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
+		while (true) {
+			try {
+				player.setName(name);
+				player.loadInformation();
+				player.setGold(Double.parseDouble(player.getInfo().get(0)));
+				break;
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+			}
+			System.out.println("Please enter name for the player again:");
+			name = scanner.next();
 		}
 	}
 
 	private static void chooseRace(Player player) {
-		System.out.print(player.getName() + " should enter the race he/she wants to play with: ");
+		System.out.println(player.getName() + " should enter the race he/she wants to play with:");
 		String race = scanner.nextLine();
 		while (!race.equals("Inferno") && !race.equals("Heaven")) {
 			System.out.println("Invalid race. Please enter Heaven or Inferno.");
@@ -70,28 +76,28 @@ public class Engine {
 
 	private static void buyUnits(Player player, List<Unit> enemyArmy) {
 		System.out.println(player.getName() + " should buy units. Enter quit when you are ready.");
-		String command = scanner.nextLine();
-		while (!command.equals("quit")) {
+		String command;
+		while (!(command = scanner.nextLine()).equals("quit")) {
+			// works if there are enough arguments
 			String[] attributes = command.split("\\s+");
 			int number = Integer.parseInt(attributes[1]);
 			String unit = attributes[2];
-			if(unit.equals("Horned")) {
+			if (unit.equals("Horned")) {
 				unit += " " + attributes[3];
 			}
 			if (isOfRace(player.getRace(), unit)) {
 				try {
 					player.buyMonster(number, unit);
+					System.out.println("You've succesfully bought " + number + " " + unit + "(s).");
 					Unit monster = getMonster(number, unit);
 					positionUnitOnField(monster, player.getArmy(), enemyArmy);
 					player.addUnitToArmy(monster);
-					scanner.nextLine();
-				} catch (NumberFormatException | InsufficientAmountOfMoneyException e) {
+				} catch (InsufficientAmountOfMoneyException e) {
 					System.out.println(e.getMessage());
 				}
 			} else {
 				System.out.println("No such unit of race " + player.getRace());
 			}
-			command = scanner.nextLine();
 		}
 	}
 
@@ -102,15 +108,16 @@ public class Engine {
 			System.out.print("Invalid type. Please enter Mage or Warrior.");
 			typeOfHero = scanner.nextLine();
 		}
-		player.createHero(typeOfHero);
-		positionUnitOnField(player.getHero(), player.getArmy(), enemyArmy);
-		player.addUnitToArmy(player.getHero());
+		Hero hero = player.createHero(typeOfHero);
+		positionUnitOnField(hero, player.getArmy(), enemyArmy);
+		player.addUnitToArmy(hero);
 	}
 
 	private static void positionUnitOnField(Unit unit, List<Unit> armyOne, List<Unit> armyTwo) {
-		System.out.println("Set the position x and y of the unit: ");
 		int x, y;
+		System.out.println("Set the position x of the unit:");
 		x = scanner.nextInt();
+		System.out.println("Set the position y of the unit:");
 		y = scanner.nextInt();
 		while (isThereUnitAtPos(x, y, armyOne, armyTwo)) {
 			System.out.println("There is a unit at this position already. Please set new x and y: ");
@@ -119,7 +126,7 @@ public class Engine {
 		}
 		unit.setPosition(x, y);
 	}
-	
+
 	private static boolean isThereUnitAtPos(int x, int y, List<Unit> armyOne, List<Unit> armyTwo) {
 		Unit unit = Unit.getUnitFromPos(x, y, armyOne, armyTwo);
 		return unit == null ? false : true;
@@ -138,8 +145,8 @@ public class Engine {
 		}
 	}
 
-	private static boolean isEndOfGame(List<Unit> army, List<Unit> armyTwo) {
-		return army.isEmpty() || armyTwo.isEmpty();
+	private static boolean isEndOfGame(List<Unit> armyOne, List<Unit> armyTwo) {
+		return armyOne.isEmpty() || armyTwo.isEmpty();
 	}
 
 	private static void enterAndProcessCommand(Player player, List<Unit> enemyArmy) {
@@ -162,9 +169,10 @@ public class Engine {
 			try {
 				Validator.validatePlayersMove(xy[0], xy[1], xy[2], xy[3], player, enemyArmy);
 				Unit.getUnitFromPos(xy[0], xy[1], player.getArmy()).move(xy[2], xy[3]);
+				System.out.println("You've moved from " + xy[0] + "," + xy[1] + " to " + xy[2] + "," + xy[3]);
 				break;
 			} catch (InvalidActionException e) {
-				System.out.println(e.getLocalizedMessage());
+				System.out.println(e.getMessage());
 			}
 			System.out.println("Enter your command again.");
 			command = scanner.nextLine().split("\\s+");
@@ -177,10 +185,11 @@ public class Engine {
 			try {
 				Validator.validatePlayersAttack(xy[0], xy[1], xy[2], xy[3], player, enemyArmy);
 				Unit.getUnitFromPos(xy[0], xy[1], player.getArmy()).attack(xy[2], xy[3], enemyArmy);
+				System.out.println(xy[0] + "," + xy[1] + " attacked unit at " + xy[2] + "," + xy[3]);
 				Unit.checkForDeadUnits(enemyArmy);
 				break;
 			} catch (InvalidActionException e) {
-				System.out.println(e.getLocalizedMessage());
+				System.out.println(e.getMessage());
 			}
 			System.out.println("Enter your command again.");
 			command = scanner.nextLine().split("\\s+");
@@ -195,19 +204,14 @@ public class Engine {
 				Validator.validatePlayersCast(toX, toY, command[2], player.getHero(), enemyArmy);
 				switch (command[1]) {
 				case "Fireball":
-					((Mage) player.getHero()).fireball(toX, toY, enemyArmy);
-					break;
+					((Mage) player.getHero()).fireball(toX, toY, enemyArmy); break;
 				case "Iceball":
-					((Mage) player.getHero()).iceball(toX, toY, enemyArmy);
-					break;
+					((Mage) player.getHero()).iceball(toX, toY, enemyArmy); break;
 				case "Stun":
-					((Warrior) player.getHero()).stun(toX, toY, enemyArmy);
-					break;
+					((Warrior) player.getHero()).stun(toX, toY, enemyArmy); break;
 				case "Shield":
-					((Warrior) player.getHero()).stun(toX, toY, player.getArmy());
-					break;
-				default:
-					System.out.println("No such spell.");
+					((Warrior) player.getHero()).stun(toX, toY, player.getArmy()); break;
+				default: break;
 				}
 				Unit.checkForDeadUnits(enemyArmy);
 				break;
@@ -233,41 +237,32 @@ public class Engine {
 		switch (unit) {
 		case "Peasant":
 			monster = new Peasant(Peasant.HP_PEASANT, Peasant.ARMOR_PEASANT, Peasant.RANGE_PEASANT,
-					Peasant.DAMAGE_PEASANT, Peasant.STAMINA_PEASANT, numberOfUnits, Peasant.PRICE_PEASANT);
-			break;
+					Peasant.DAMAGE_PEASANT, Peasant.STAMINA_PEASANT, numberOfUnits, Peasant.PRICE_PEASANT); break;
 		case "Brute":
 			monster = new Brute(Brute.HP_BRUTE, Brute.ARMOR_BRUTE, Brute.RANGE_BRUTE, Brute.DAMAGE_BRUTE,
-					Brute.STAMINA_BRUTE, numberOfUnits, Brute.PRICE_BRUTE);
-			break;
+					Brute.STAMINA_BRUTE, numberOfUnits, Brute.PRICE_BRUTE); break;
 		case "Archer":
 			monster = new Archer(Archer.HP_ARCHER, Archer.ARMOR_ARCHER, Archer.RANGE_ARCHER, Archer.DAMAGE_ARCHER,
-					Archer.STAMINA_ARCHER, numberOfUnits, Archer.PRICE_ARCHER);
-			break;
+					Archer.STAMINA_ARCHER, numberOfUnits, Archer.PRICE_ARCHER); break;
 		case "Crossbowman":
 			monster = new Crossbowman(Crossbowman.HP_CROSSBOWMAN, Crossbowman.ARMOR_CROSSBOWMAN,
 					Crossbowman.RANGE_CROSSBOWMAN, Crossbowman.DAMAGE_CROSSBOWMAN, Crossbowman.STAMINA_CROSSBOWMAN,
-					numberOfUnits, Crossbowman.PRICE_CROSSBOWMAN);
-			break;
+					numberOfUnits, Crossbowman.PRICE_CROSSBOWMAN); break;
 		case "Imp":
 			monster = new Imp(Imp.HP_IMP, Imp.ARMOR_IMP, Imp.RANGE_IMP, Imp.DAMAGE_IMP, Imp.STAMINA_IMP, numberOfUnits,
-					Imp.PRICE_IMP);
-			break;
+					Imp.PRICE_IMP); break;
 		case "Vermin":
 			monster = new Vermin(Vermin.HP_VERMIN, Vermin.ARMOR_VERMIN, Vermin.RANGE_VERMIN, Vermin.DAMAGE_VERMIN,
-					Vermin.STAMINA_VERMIN, numberOfUnits, Vermin.PRICE_VERMIN);
-			break;
+					Vermin.STAMINA_VERMIN, numberOfUnits, Vermin.PRICE_VERMIN); break;
 		case "Horned demon":
 			monster = new HornedDemon(HornedDemon.HP_HORNEDDEMON, HornedDemon.ARMOR_HORNEDDEMON,
 					HornedDemon.RANGE_HORNEDDEMON, HornedDemon.DAMAGE_HORNEDDEMON, HornedDemon.STAMINA_HORNEDDEMON,
-					numberOfUnits, HornedDemon.PRICE_HORNEDDEMON);
-			break;
-		case "Horned grunt	":
+					numberOfUnits, HornedDemon.PRICE_HORNEDDEMON); break;
+		case "Horned grunt":
 			monster = new HornedGrunt(HornedGrunt.HP_HORNEDGRUNT, HornedGrunt.ARMOR_HORNEDGRUNT,
 					HornedGrunt.RANGE_HORNEDGRUNT, HornedGrunt.DAMAGE_HORNEDGRUNT, HornedGrunt.STAMINA_HORNEDGRUNT,
-					numberOfUnits, HornedGrunt.PRICE_HORNEDGRUNT);
-			break;
-		default:
-			break;
+					numberOfUnits, HornedGrunt.PRICE_HORNEDGRUNT); break;
+		default: break;
 		}
 		return monster;
 	}
@@ -279,16 +274,13 @@ public class Engine {
 		case "Brute":
 		case "Archer":
 		case "Crossbowman":
-			monsterRace = "Heaven";
-			break;
+			monsterRace = "Heaven"; break;
 		case "Imp":
 		case "Vermin":
 		case "Horned grunt":
 		case "Horned demon":
-			monsterRace = "Inferno";
-			break;
-		default:
-			break;
+			monsterRace = "Inferno"; break;
+		default: break;
 		}
 		return race.equals(monsterRace);
 	}
