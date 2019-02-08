@@ -9,8 +9,6 @@ import java.util.List;
 
 import homm.exceptions.InsufficientAmountOfMoneyException;
 import homm.hero.Hero;
-import homm.hero.Mage;
-import homm.hero.Warrior;
 import homm.monster.Archer;
 import homm.monster.Brute;
 import homm.monster.Crossbowman;
@@ -26,10 +24,10 @@ public class Player {
 	private int id;
 	private String name;
 	private double gold;
-	private Hero hero;
 	private List<Unit> army;
 	private List<String> info;
 	private String race;
+	public Hero hero;
 
 	public Player(int id) {
 		this.id = id;
@@ -48,28 +46,6 @@ public class Player {
 				this.info.add(line);
 			}
 		}
-	}
-
-	public Hero createHero(String type) {
-		if (type.equals("Mage")) {
-			this.hero = new Mage(Mage.HP_MAGE, Mage.ARMOR_MAGE, Mage.RANGE_MAGE, Mage.DAMAGE_MAGE, Mage.STAMINA_MAGE);
-			this.hero.setNumberOfUnits(1);
-			this.hero.setLevel(Integer.parseInt(info.get(1)));
-			this.hero.setExperience(Integer.parseInt(info.get(2)));
-			this.hero.setNextLvlExperience(Integer.parseInt(info.get(3)));
-			this.hero.setMana(Double.parseDouble(info.get(4)));
-			this.hero.setCrit(Double.parseDouble(info.get(5)));
-		} else {
-			this.hero = new Warrior(Warrior.HP_WARRIOR, Warrior.ARMOR_WARRIOR, Warrior.RANGE_WARRIOR,
-					Warrior.DAMAGE_WARRIOR, Warrior.STAMINA_WARRIOR);
-			this.hero.setNumberOfUnits(1);
-			this.hero.setLevel(Integer.parseInt(info.get(1)));
-			this.hero.setExperience(Integer.parseInt(info.get(2)));
-			this.hero.setNextLvlExperience(Integer.parseInt(info.get(3)));
-			this.hero.setMana(Double.parseDouble(info.get(4)));
-			this.hero.setCrit(Double.parseDouble(info.get(5)));
-		}
-		return this.hero;
 	}
 
 	public void buyMonster(int numberOfUnits, String unit) throws InsufficientAmountOfMoneyException {

@@ -1,6 +1,8 @@
 package homm.demo;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Scanner;
 
@@ -9,16 +11,9 @@ import homm.exceptions.InvalidActionException;
 import homm.hero.Hero;
 import homm.hero.Mage;
 import homm.hero.Warrior;
-import homm.monster.Archer;
-import homm.monster.Brute;
-import homm.monster.Crossbowman;
-import homm.monster.HornedDemon;
-import homm.monster.HornedGrunt;
-import homm.monster.Imp;
-import homm.monster.Peasant;
-import homm.monster.Vermin;
 import homm.player.Player;
 import homm.unit.Unit;
+import homm.unit.UnitFactory;
 import homm.validator.Validator;
 
 public class Engine {
@@ -31,7 +26,7 @@ public class Engine {
 	private Player playerOne = new Player(PLAYER_ONE_ID);
 	private Player playerTwo = new Player(PLAYER_TWO_ID);
 
-	public void start() {
+	public void start() throws NumberFormatException, IOException {
 		readPlayersName(playerOne);
 		readPlayersName(playerTwo);
 
@@ -74,10 +69,11 @@ public class Engine {
 		player.setRace(race);
 	}
 
-	private static void buyUnits(Player player, List<Unit> enemyArmy) {
+	private static void buyUnits(Player player, List<Unit> enemyArmy) throws NumberFormatException, IOException {
 		System.out.println(player.getName() + " should buy units. Enter quit when you are ready.");
 		String command;
-		while (!(command = scanner.nextLine()).equals("quit")) {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		while (!(command = br.readLine()).equals("quit")) {
 			// works if there are enough arguments
 			String[] attributes = command.split("\\s+");
 			int number = Integer.parseInt(attributes[1]);
@@ -89,7 +85,7 @@ public class Engine {
 				try {
 					player.buyMonster(number, unit);
 					System.out.println("You've succesfully bought " + number + " " + unit + "(s).");
-					Unit monster = getMonster(number, unit);
+					Unit monster = UnitFactory.createMonster(unit, number);
 					positionUnitOnField(monster, player.getArmy(), enemyArmy);
 					player.addUnitToArmy(monster);
 				} catch (InsufficientAmountOfMoneyException e) {
@@ -98,6 +94,7 @@ public class Engine {
 			} else {
 				System.out.println("No such unit of race " + player.getRace());
 			}
+			System.out.println("Continue?");
 		}
 	}
 
@@ -108,7 +105,7 @@ public class Engine {
 			System.out.print("Invalid type. Please enter Mage or Warrior.");
 			typeOfHero = scanner.nextLine();
 		}
-		Hero hero = player.createHero(typeOfHero);
+		Hero hero = (Hero) UnitFactory.createHero(typeOfHero, player);
 		positionUnitOnField(hero, player.getArmy(), enemyArmy);
 		player.addUnitToArmy(hero);
 	}
@@ -230,41 +227,6 @@ public class Engine {
 		coord[2] = Integer.parseInt(command[4]);
 		coord[3] = Integer.parseInt(command[5]);
 		return coord;
-	}
-
-	public static Unit getMonster(int numberOfUnits, String unit) {
-		Unit monster = null;
-		switch (unit) {
-		case "Peasant":
-			monster = new Peasant(Peasant.HP_PEASANT, Peasant.ARMOR_PEASANT, Peasant.RANGE_PEASANT,
-					Peasant.DAMAGE_PEASANT, Peasant.STAMINA_PEASANT, numberOfUnits, Peasant.PRICE_PEASANT); break;
-		case "Brute":
-			monster = new Brute(Brute.HP_BRUTE, Brute.ARMOR_BRUTE, Brute.RANGE_BRUTE, Brute.DAMAGE_BRUTE,
-					Brute.STAMINA_BRUTE, numberOfUnits, Brute.PRICE_BRUTE); break;
-		case "Archer":
-			monster = new Archer(Archer.HP_ARCHER, Archer.ARMOR_ARCHER, Archer.RANGE_ARCHER, Archer.DAMAGE_ARCHER,
-					Archer.STAMINA_ARCHER, numberOfUnits, Archer.PRICE_ARCHER); break;
-		case "Crossbowman":
-			monster = new Crossbowman(Crossbowman.HP_CROSSBOWMAN, Crossbowman.ARMOR_CROSSBOWMAN,
-					Crossbowman.RANGE_CROSSBOWMAN, Crossbowman.DAMAGE_CROSSBOWMAN, Crossbowman.STAMINA_CROSSBOWMAN,
-					numberOfUnits, Crossbowman.PRICE_CROSSBOWMAN); break;
-		case "Imp":
-			monster = new Imp(Imp.HP_IMP, Imp.ARMOR_IMP, Imp.RANGE_IMP, Imp.DAMAGE_IMP, Imp.STAMINA_IMP, numberOfUnits,
-					Imp.PRICE_IMP); break;
-		case "Vermin":
-			monster = new Vermin(Vermin.HP_VERMIN, Vermin.ARMOR_VERMIN, Vermin.RANGE_VERMIN, Vermin.DAMAGE_VERMIN,
-					Vermin.STAMINA_VERMIN, numberOfUnits, Vermin.PRICE_VERMIN); break;
-		case "Horned demon":
-			monster = new HornedDemon(HornedDemon.HP_HORNEDDEMON, HornedDemon.ARMOR_HORNEDDEMON,
-					HornedDemon.RANGE_HORNEDDEMON, HornedDemon.DAMAGE_HORNEDDEMON, HornedDemon.STAMINA_HORNEDDEMON,
-					numberOfUnits, HornedDemon.PRICE_HORNEDDEMON); break;
-		case "Horned grunt":
-			monster = new HornedGrunt(HornedGrunt.HP_HORNEDGRUNT, HornedGrunt.ARMOR_HORNEDGRUNT,
-					HornedGrunt.RANGE_HORNEDGRUNT, HornedGrunt.DAMAGE_HORNEDGRUNT, HornedGrunt.STAMINA_HORNEDGRUNT,
-					numberOfUnits, HornedGrunt.PRICE_HORNEDGRUNT); break;
-		default: break;
-		}
-		return monster;
 	}
 
 	private static boolean isOfRace(String race, String monster) {
